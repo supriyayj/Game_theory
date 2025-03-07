@@ -1,0 +1,257 @@
+import pandas as pd
+import numpy as np
+import xgboost as xgb
+!pip install shap
+import shap
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
+plt.rcParams.update({'font.family':'Nimbus Roman'})
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+# Load the breast cancer dataset into a pandas dataframe
+data = load_breast_cancer(as_frame=True)
+df = pd.concat([data.data, data.target], axis=1)
+df.columns = np.append(data.feature_names, 'target')
+
+# Split the dataset into features and target variable
+X = df.drop('target', axis=1)
+y = df['target']
+
+# Train an XGBoost model on the dataset
+model = xgb.XGBClassifier()
+model.fit(X, y)
+
+# Use SHAP values to determine feature importance
+explainer = shap.Explainer(model)
+shap_values = explainer(X)
+shap.summary_plot(shap_values, X,show=False)
+#shap.plots.bar(shap_values)
+plt.savefig("accuracy.pdf", dpi=300)
+# Extract the shapely values for each feature
+mean_shap_values = np.mean(np.abs(shap_values.values), axis=0)
+
+# Sort the features by shapely value in descending order
+feature_importance = pd.DataFrame(list(zip(X.columns, mean_shap_values)), columns=['feature', 'importance'])
+feature_importance = feature_importance.sort_values('importance', ascending=False)
+
+# Print the top 10 features by shapely value
+print(feature_importance.head(10))
+# Select the top 10 features
+top_features = feature_importance['feature'].head(10).tolist()
+# Create a new dataframe with only the top features
+X_top = X[top_features]
+
+# Split the dataset into training and testing sets
+
+#X_temp, X_test, y_temp, y_test = train_test_split(X_top, y, test_size=0.2, random_state=42)
+#X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.25, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_top, y, test_size=0.2, random_state=42)
+
+import os
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import tensorflow as tf
+from sklearn.preprocessing import OneHotEncoder
+from tensorflow.keras.datasets import cifar10
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.backend import image_data_format
+from keras.models import Sequential
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+from keras.models import Sequential
+from mlxtend.plotting import plot_confusion_matrix
+from sklearn.metrics import confusion_matrix
+from keras.layers import Dense
+from keras.layers import Conv2D, DepthwiseConv2D, SeparableConv2D
+from keras.layers import AvgPool2D, MaxPooling2D, Dropout, Flatten, BatchNormalization
+from keras.constraints import maxnorm
+import matplotlib.pyplot as plt
+import numpy as np
+import copy
+import random
+import sys
+import glob
+import keras
+import cv2
+import csv
+import time
+from sklearn.metrics import roc_auc_score, roc_curve
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from keras.callbacks import ModelCheckpoint
+
+import os
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import tensorflow as tf
+from sklearn.preprocessing import OneHotEncoder
+from tensorflow.keras.datasets import cifar10
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.backend import image_data_format
+from keras.models import Sequential
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+from keras.models import Sequential
+from mlxtend.plotting import plot_confusion_matrix
+from sklearn.metrics import confusion_matrix
+from keras.layers import Dense
+from keras.layers import Conv2D, DepthwiseConv2D, SeparableConv2D
+from keras.layers import AvgPool2D, MaxPooling2D, Dropout, Flatten, BatchNormalization
+from keras.constraints import maxnorm
+import matplotlib.pyplot as plt
+import numpy as np
+import copy
+import random
+import sys
+import glob
+import keras
+import cv2
+import csv
+import time
+from sklearn.metrics import roc_auc_score, roc_curve
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from keras.callbacks import ModelCheckpoint
+
+import numpy as np
+import tensorflow as tf
+from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, roc_auc_score
+
+# Initialize structures for metrics storage
+serverhist1 = {
+    "loss": [],
+    "accuracy": [],
+    "payoff": [],
+    "f1_score": [],
+    "precision": [],
+    "recall": [],
+    "auc": []
+}
+client_payoff = []
+client_number = []
+all_rounds_payoffs = []
+confusion_matrices = []
+global_accuracies = []
+global_accuracy_final = []
+global_losses = []
+auc_list = []
+def GTFL(X_train, y_train, X_test, y_test, num_clients, num_epochs, batch_size, lr):
+    input_shape = X_train.shape[1:]
+    model_list = []
+
+    for i in range(num_clients):
+        model = tf.keras.models.Sequential([
+            tf.keras.layers.Dense(64, activation='relu', input_shape=input_shape),
+            tf.keras.layers.Dense(32, activation='relu'),
+            tf.keras.layers.Dense(1, activation='sigmoid')
+        ])
+
+        model.compile(optimizer=tf.keras.optimizers.Adam(lr=lr), loss='binary_crossentropy', metrics=['accuracy'])
+        model_list.append(model)
+
+    # Added lists to store global metrics
+    global_losses = []
+    global_accuracies = []
+
+    for epoch in range(num_epochs):
+        for i in range(num_clients):
+            model_list[i].fit(
+                X_train[i * (len(X_train) // num_clients):(i + 1) * (len(X_train) // num_clients)],
+                y_train[i * (len(X_train) // num_clients):(i + 1) * (len(X_train) // num_clients)],
+                epochs=client_epochs,
+                batch_size=batch_size,
+                validation_data=(X_test, y_test)
+            )
+
+            y_pred = model_list[i].predict(X_test)
+            y_pred_binary = (y_pred > 0.5).astype(int)
+            precision, recall, f1, _ = precision_recall_fscore_support(y_test, y_pred_binary, average='binary')
+            cm = confusion_matrix(y_test, y_pred_binary)
+            auc = roc_auc_score(y_test, y_pred)
+
+            h = model_list[i].evaluate(X_test, y_test)
+
+            serverhist1['loss'].append(h[0])
+            serverhist1['accuracy'].append(h[1])
+            serverhist1['precision'].append(precision)
+            serverhist1['recall'].append(recall)
+            serverhist1['f1_score'].append(f1)
+            serverhist1['auc'].append(auc)
+
+        client_accuracies = []
+        for i in range(num_clients):
+            _, accuracy = model_list[i].evaluate(X_test, y_test, verbose=0)
+            client_accuracies.append(accuracy)
+
+        client_payoffs = []
+        for i in range(num_clients):
+            payoff = client_accuracies[i] - np.mean(client_accuracies)
+            client_payoffs.append(payoff)
+            client_payoff.append(payoff)
+            client_number.append(i)
+            serverhist1['payoff'].append(client_payoffs[i])
+
+        all_rounds_payoffs.append(client_payoffs)
+
+        sorted_clients = sorted(range(num_clients), key=lambda x: client_payoffs[x], reverse=True)
+        print("sorted clients",sorted_clients)
+        selected_clients = sorted_clients[:num_clients_to_select]
+        print("selected clients len", selected_clients)
+        selected_payoffs = [client_payoffs[i] for i in selected_clients]
+        weights = [client_payoffs[i] for i in selected_clients]
+        print("Payoffs of selected clients:", selected_payoffs)
+        weights /= np.sum(weights)
+
+        global_weights = np.zeros_like(model_list[0].get_weights())
+        for i in range(num_clients_to_select):
+            global_weights += weights[i] * np.array(model_list[i].get_weights())
+        new_global_weights = global_weights / num_clients_to_select
+
+        #for i in range(num_clients):
+         #   model_list[i].set_weights(new_global_weights)
+          #  for layer in model_list[i].layers:
+           #     layer.set_weights(layer.get_weights() + lr * client_payoffs[i])
+
+        #global_weights = np.array(model_list[0].get_weights())
+        for i in range(1, num_clients):
+            global_weights += np.array(model_list[i].get_weights())
+        new_global_weights = global_weights / num_clients
+
+        for i in range(num_clients):
+            model_list[i].set_weights(new_global_weights)
+
+        # Moved inside the num_epochs loop
+
+        global_loss, global_accuracy = model_list[0].evaluate(X_test, y_test, verbose=0)
+        global_losses.append(global_loss)
+        global_accuracies.append(global_accuracy)
+        print(f"Epoch {epoch + 1} - Global accuracy: {global_accuracy}")
+
+    return global_accuracies, global_losses
+# Hyperparameters and the algorithm's execution
+num_clients = 20
+num_clients_to_select = 10
+num_epochs = 40
+client_epochs = 10
+batch_size = 32
+lr = 0.1
+
+global_accuracy = GTFL(X_train, y_train, X_test, y_test, num_clients, num_epochs, batch_size, lr)
+
+print("\nTop-performing client payoffs for each round:")
+for round_num, round_payoffs in enumerate(all_rounds_payoffs):
+    sorted_round_payoffs = sorted(round_payoffs, reverse=True)
+    print(f"Round {round_num + 1}:", sorted_round_payoffs[:num_clients_to_select])
+print(len(global_accuracies))
+print("\t\t\tFL")
+#for i in range(num_epochs):
+  #  print("global accuracy",str(global_accuracies[i]))
