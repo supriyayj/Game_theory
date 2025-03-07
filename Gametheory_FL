@@ -1,0 +1,264 @@
+import numpy as np
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.utils import to_categorical
+import tensorflow as tf
+import os
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import os
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import tensorflow as tf
+from sklearn.preprocessing import OneHotEncoder
+from tensorflow.keras.datasets import cifar10
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.backend import image_data_format
+from keras.models import Sequential
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+from keras.models import Sequential
+from mlxtend.plotting import plot_confusion_matrix
+from sklearn.metrics import confusion_matrix
+from keras.layers import Dense
+from keras.layers import Conv2D, DepthwiseConv2D, SeparableConv2D 
+from keras.layers import AvgPool2D, MaxPooling2D, Dropout, Flatten, BatchNormalization
+from keras.constraints import maxnorm
+import matplotlib.pyplot as plt
+import numpy as np
+import copy
+import random
+import sys
+import glob
+import keras
+import cv2
+import csv
+import time
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from keras.callbacks import ModelCheckpoint
+import tensorflow as tf
+from sklearn.preprocessing import OneHotEncoder
+from tensorflow.keras.datasets import cifar10
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.backend import image_data_format
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Conv1D, DepthwiseConv2D, SeparableConv2D 
+from keras.layers import AvgPool2D, MaxPooling2D, Dropout, Flatten, BatchNormalization
+from keras.constraints import maxnorm
+import matplotlib.pyplot as plt
+import numpy as np
+import copy
+import random
+import sys
+import csv
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+import time
+from keras.callbacks import ModelCheckpoint
+from google.colab import drive
+drive.mount('/content/drive')
+#filepath = "/kaggle/input/parkinson-disease-detection/Parkinsson disease.csv"
+#data = pd.read_csv('/content/Parkinsson disease.csv')
+#independent_variables = [
+  #'MDVP:Fo(Hz)', 'MDVP:Fhi(Hz)', 'MDVP:Flo(Hz)', 'MDVP:Jitter(%)',
+  #'MDVP:Jitter(Abs)', 'MDVP:RAP', 'MDVP:PPQ', 'Jitter:DDP',
+  #'MDVP:Shimmer', 'MDVP:Shimmer(dB)', 'Shimmer:APQ3', 'Shimmer:APQ5',
+ # 'MDVP:APQ', 'Shimmer:DDA', 'NHR', 'HNR', 'RPDE', 'DFA',
+ # 'spread1', 'spread2', 'D2', 'PPE'
+#]
+#health_status = data['status'].values.astype(int)
+
+#voice_statistics = data[independent_variables]
+
+#X_train, X_test, y_train, y_test = train_test_split(
+    #voice_statistics, health_status, test_size = 0.2, random_state=4686)
+#print(X_train.shape)
+#print(X_test.shape)
+#X_train = X_train.values.reshape(22,3*224*224)
+#X_test = X_test.values.reshape(10,3*224*224)
+#nx, ny = X_train.shape
+#d2_train_dataset = X_train.reshape((nsamples,nx*ny))
+#/content/California_Fire_Incidents.csv
+#read_file = pd.read_excel('/content/drive/MyDrive/Wildfire_Dataset_new.xlsx')
+#read_file.to_csv ('/content/drive/MyDrive/Wildfire_Dataset_new.csv', index = None, header=True)
+
+#x_train=list()
+#y_train=list()
+#fire = glob.glob('/content/drive/MyDrive/Forest Fire Dataset/Training/fire/*.jpg')
+#nfire =glob.glob('/content/drive/MyDrive/Forest Fire Dataset/Training/nofire/*.jpg')
+#for i in fire:
+    #img=cv2.imread(i,1)
+    #img=cv2.resize(img,(150,150))
+    #img=np.float32(img)
+    #img/=255.0
+    #img = img.reshape(150, 150, 3)
+    #x_train.append(img)
+    #y_train.append(1)
+#for j in nfire:
+    #img=cv2.imread(j,1)
+    #img=cv2.resize(img,(150,150))
+    #img=np.float32(img)
+    #img/=255.0
+    #img = img.reshape(150, 150, 3)
+    #x_train.append(img)
+    #y_train.append(0)
+#x_train=np.asarray(x_train)
+#y_train=np.asarray(y_train)
+#y_train=to_categorical(y_train)
+#x_train.shape
+#y_train.shape
+#firel = glob.glob('/content/drive/MyDrive/Forest Fire Dataset/Testing/fire/*.jpg')
+#nfirel=glob.glob('//content/drive/MyDrive/Forest Fire Dataset/Testing/nofire/*.jpg')
+#x_test=list()
+#y_test=list()
+#for i in firel:
+    #img=cv2.imread(i,1)
+    #img=cv2.resize(img,(150,150))
+    #img=np.float32(img)
+    #img/=255.0
+    #img = img.reshape(150, 150, 3)
+    #img=img.tolist()
+    #x_test.append(img)
+    #y_test.append(1)
+#for i in nfirel:
+    #img=cv2.imread(i,1)
+    #img=cv2.resize(img,(150,150))
+    #img=np.float32(img)
+    #img/=255.0
+    #img = img.reshape(150, 150, 3)
+    #img=img.tolist()
+    #x_test.append(img)
+    #y_test.append(0)
+#x_test=np.asarray(x_test)
+#y_test=np.asarray(y_test)
+#y_test=to_categorical(y_test)
+#x_test.shape
+#y_test.shape
+#/content/California_Fire_Incidents.csv
+#read_file = pd.read_excel('/content/drive/MyDrive/Wildfire_Dataset_new.xlsx')
+# Load the MNIST dataset
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+X_train = X_train.reshape((X_train.shape[0], 28*28))
+X_test = X_test.reshape((X_test.shape[0], 28*28))
+X_train = X_train.astype('float32') / 255.0
+X_test = X_test.astype('float32') / 255.0
+y_train = to_categorical(y_train)
+y_test = to_categorical(y_test)
+#le = LabelEncoder()
+#le.fit(data.iloc[:, 5])
+#y = le.transform(data.iloc[:, 5])
+#X = data.iloc[:, :-1]
+#shape=X.shape[1]
+serverhist1={
+    "loss": list(),
+    "accuracy": list(),
+    "payoff": list()
+    }
+client_payoff = []
+from sklearn.ensemble import RandomForestClassifier
+def game_theory_federated_learning(X_train, y_train, X_test, y_test, num_clients, num_epochs, batch_size, lr):
+    num_classes = y_train.shape[1]
+    input_shape = X_train.shape[1:]
+    model_list = []
+    for i in range(num_clients):
+        #model = RandomForestClassifier(max_depth=6, n_estimators=10, random_state=4686)
+        #model.fit(X_train, y_train)
+
+        #from sklearn.metrics import classification_report
+        #y_pred = model.predict(X_test)
+        #print(classification_report(y_test, y_pred))  
+        
+        model=tf.keras.Sequential([
+            tf.keras.layers.Flatten(input_shape=input_shape),
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dense(num_classes, activation='softmax')
+        #tf.keras.layers.Dense(1, input_shape=(22, ), activation='relu')
+        #tf.keras.layers.Dense(16, activation='relu')
+        #tf.keras.layers.Dense(1, activation='sigmoid')
+        #tf.keras.layers.Conv2D(32,(3,3),activation='relu',input_shape=(22))
+        #tf.keras.layers.MaxPool2D(2,2)
+         #tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(784))
+         #tf.keras.layers.Conv2D(64, (3, 3), activation='relu')
+         #tf.keras.layers.Conv2D.MaxPooling2D(pool_size=(2, 2))
+         
+         #model.add(Dense(10, activation='softmax'))
+         #tf.keras.layers.Dense(128, activation='relu'),
+         #tf.keras.layers.Dense(num_classes, activation='softmax')
+        ])
+        model.compile(optimizer=tf.keras.optimizers.Adam(lr=lr), loss='categorical_crossentropy', metrics=['accuracy'])
+        model_list.append(model)
+
+    # Train each client model for a fixed number of epochs
+    for i in range(num_clients):
+        print("----------------CLIENT " + str(i) +"-------------------------")
+        model_list[i].fit(X_train[i*(len(X_train)//num_clients):(i+1)*(len(X_train)//num_clients)],
+                          y_train[i*(len(X_train)//num_clients):(i+1)*(len(X_train)//num_clients)],
+                          epochs=num_epochs, batch_size=batch_size,validation_data=(X_test, y_test))
+        #h=model_list[i].evaluate(X_test,y_test)
+        #serverhist1['loss'].append(h[1])
+        #serverhist1['accuracy'].append(h[0])
+
+    # Calculate each client's accuracy on the test set
+    client_accuracies = []
+    for i in range(num_clients):
+        _, accuracy = model_list[i].evaluate(X_test, y_test, verbose=0)
+        client_accuracies.append(accuracy)
+
+    # Calculate each client's payoff
+    client_payoffs = []
+    for i in range(num_clients):
+        print("----------------CLIENT " + str(i) +"-------------------------")
+        payoff = client_accuracies[i] - np.mean(client_accuracies)
+        print("----------------PAYOFF " + str(i) +"-------------------------"+ str(payoff))
+        client_payoffs.append(payoff)
+        client_payoff.append(payoff)
+        h=model_list[i].evaluate(X_test,y_test)
+        serverhist1['loss'].append(h[1])
+        serverhist1['accuracy'].append(h[0])
+        serverhist1['payoff'].append(client_payoffs[i])
+    model.summary()
+    # Update each client's model based on their payoff
+    for i in range(num_clients):
+        #print("-----Num of Clients"+num_clients)
+        for layer in model_list[i].layers:
+            layer.set_weights(layer.get_weights() + lr * client_payoffs[i])
+            print("weights of the layers"+str(layer.get_weights()))
+
+    # Aggregate the updated models to form the new global model
+    global_weights = np.array(model_list[0].get_weights())
+    for i in range(1, num_clients):
+        global_weights += np.array(model_list[i].get_weights())
+    new_global_weights = global_weights / num_clients
+    #h=model_list[i].evaluate(X_test,y_test)
+    #serverhist1['loss'].append(h[1])
+    #serverhist1['accuracy'].append(h[0])
+    # Update the global model
+    for i in range(num_clients):
+        model_list[i].set_weights(new_global_weights)
+    
+    # Evaluate the new global model
+    _, global_accuracy = model_list[0].evaluate(X_test, y_test, verbose=0)
+    return global_accuracy
+
+# Set the hyperparameters
+num_clients = 10
+num_epochs = 10
+batch_size = 32
+lr = 0.1
+
+# Run the game-theoretic federated learning algorithm
+global_accuracy = game_theory_federated_learning(X_train, y_train, X_test, y_test, num_clients, num_epochs, batch_size, lr)
+print("Global accuracy:", global_accuracy)
+#server_model = game_theory_federated_learning(X_train, y_train, X_test, y_test, num_clients, num_epochs, batch_size, lr)   
+print(" \t\t\tFL")
+print("Round\tAccuracy\t\tLoss\t\tPayoff")
+for i in range(num_epochs):
+  print(str(serverhist1['loss'][i])+"\t"+str(serverhist1['accuracy'][i])+"\t"+str(client_payoff[i]))
+     
